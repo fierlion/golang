@@ -10,11 +10,18 @@ import (
     "sync"
 )
 
-func dotprod(input1, input2, output [5][5]uint32, start, end int, wg *sync.WaitGroup) {
+const ARR_SIZE = 1500
+
+func dotprod(input1, input2, output *[ARR_SIZE][ARR_SIZE]uint32,
+             start, end int,
+             wg *sync.WaitGroup) {
     for i := start; i < end; i++ {
-        for j := start; j < end; j++ {
-            fmt.Printf("%d, %d, %d\n", i, j, input1[i][j])
-            fmt.Printf("%d, %d, %d\n", i, j, input2[i][j])
+        for j := 0; j < ARR_SIZE; j++ {
+            var sum uint32
+            for k := 0; k < ARR_SIZE; k++ {
+                sum += (input1[i][j] * input2[j][k])
+            }
+            output[i][j] = sum
         }
     }
     wg.Done()
@@ -28,10 +35,10 @@ func main() {
     file2_raw, _ := reader.ReadString('\n')
     file2_stripped := strings.TrimSpace(file2_raw)
     f2, _ := os.Open(file2_stripped)
-    var ints1 [5][5]uint32
-    var ints2 [5][5]uint32
-    for i := 0; i < 5; i++ {
-        for j := 0; j < 5; j++ {
+    var ints1 [ARR_SIZE][ARR_SIZE]uint32
+    var ints2 [ARR_SIZE][ARR_SIZE]uint32
+    for i := 0; i < ARR_SIZE; i++ {
+        for j := 0; j < ARR_SIZE; j++ {
             b1 := make([]byte, 4)
             b2 := make([]byte, 4)
             f1.Read(b1)
@@ -42,16 +49,16 @@ func main() {
             ints2[i][j] = this_int2
         }
     }
-    var results [5][5]uint32
+    var results [ARR_SIZE][ARR_SIZE]uint32
     threads_raw, _ := reader.ReadString('\n')
     threads_stripped := strings.TrimSpace(threads_raw)
     threads, _ := strconv.Atoi(threads_stripped)
     var wg sync.WaitGroup
     wg.Add(threads)
     for t := 0; t < threads; t ++ {
-        go_start := t * (5/threads)
-        go_end := (t+1) * (5/threads)
-        go dotprod(ints1, ints2, results, go_start, go_end, &wg)
+        go_start := t * (ARR_SIZE/threads)
+        go_end := (t+1) * (ARR_SIZE/threads)
+        go dotprod(&ints1, &ints2, &results, go_start, go_end, &wg)
     }
     wg.Wait()
 }
