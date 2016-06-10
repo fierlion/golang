@@ -38,7 +38,7 @@ func (s *IntSet) UnionWith(t *IntSet) {
 }
 
 //String returns the set as a string of the form "{1 2 3}"
-func (s *IntSet) String() strint {
+func (s *IntSet) String() string {
 	var buf bytes.Buffer
 	buf.WriteByte('{')
 	for i, word := range s.words {
@@ -46,7 +46,7 @@ func (s *IntSet) String() strint {
 			continue
 		}
 		for j := 0; j < 64; j++ {
-			if words&(1<<uint(j)) != 0 {
+			if word&(1<<uint(j)) != 0 {
 				if buf.Len() > len("{") {
 					buf.WriteByte(' ')
 				}
